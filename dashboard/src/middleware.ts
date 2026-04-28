@@ -9,12 +9,16 @@ export async function middleware(request: NextRequest) {
   });
 
   // Apply Security Headers for Production Hardening
-  response.headers.set('X-DNS-Prefetch-Control', 'on');
-  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
+  const applyHeaders = (res: NextResponse) => {
+    res.headers.set('X-DNS-Prefetch-Control', 'on');
+    res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    res.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    res.headers.set('X-Content-Type-Options', 'nosniff');
+    res.headers.set('Referrer-Policy', 'origin-when-cross-origin');
+    res.headers.set('X-XSS-Protection', '1; mode=block');
+  };
+
+  applyHeaders(response);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,8 +37,9 @@ export async function middleware(request: NextRequest) {
               headers: request.headers,
             },
           });
-          cookiesToSet.forEach(({ name, value }) =>
-            response.cookies.set(name, value)
+          applyHeaders(response);
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
           );
         },
       },
@@ -45,6 +50,22 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Helper to redirect while preserving cookies and headers
+  const redirect = (path: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = path;
+    const redirectResponse = NextResponse.redirect(url);
+    
+    // Copy cookies from our manipulated response
+    response.cookies.getAll().forEach(cookie => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+    
+    // Copy headers
+    applyHeaders(redirectResponse);
+    return redirectResponse;
+  };
+
   // 1. Protect dashboard routes
   const isAuthPage = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup");
   const isWorkspacesPage = request.nextUrl.pathname.startsWith("/workspaces");
@@ -52,7 +73,7 @@ export async function middleware(request: NextRequest) {
   const isSettingsPage = request.nextUrl.pathname.startsWith("/settings");
 
   if (!user && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirect("/login");
   }
 
   if (user) {
@@ -71,19 +92,19 @@ export async function middleware(request: NextRequest) {
 
     // Route protections
     if (isAuthPage) {
-      return NextResponse.redirect(new URL(hasWorkspace ? "/" : "/workspaces", request.url));
+      return redirect(hasWorkspace ? "/" : "/workspaces");
     }
 
     if (!hasWorkspace && !isWorkspacesPage) {
-      return NextResponse.redirect(new URL("/workspaces", request.url));
+      return redirect("/workspaces");
     }
 
     if (isAdminPage && role !== "super_admin") {
-      return NextResponse.redirect(new URL("/", request.url));
+      return redirect("/");
     }
 
     if (isSettingsPage && role !== "owner" && role !== "super_admin" && role !== "admin") {
-      return NextResponse.redirect(new URL("/", request.url));
+      return redirect("/");
     }
   }
 
@@ -92,13 +113,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

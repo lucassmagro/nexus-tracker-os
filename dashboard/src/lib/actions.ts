@@ -120,11 +120,14 @@ export async function signUpAction(formData: FormData) {
   const password = formData.get("password") as string;
   const supabase = await createClient();
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+    (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:3001');
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/auth/callback`,
+      emailRedirectTo: `${baseUrl}/auth/callback`,
     },
   });
 
