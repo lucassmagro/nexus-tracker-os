@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* ── Nexus Tracker OS — Design Tokens ──────────────────────────────── */
+
+:root {
+  /* Dark Mode (default) */
+  --background:     #09090b;
+  --surface:        #18181b;
+  --surface-hover:  #27272a;
+  --border:         #2e2e33;
+  --border-subtle:  #1f1f23;
+  --foreground:     #fafafa;
+  --foreground-dim: #a1a1aa;
+  --foreground-muted: #71717a;
+
+  /* Brand */
+  --accent:         #6d5dfc;
+  --accent-hover:   #7c6fff;
+  --accent-muted:   rgba(109, 93, 252, 0.15);
+
+  /* Semantic */
+  --success:        #22c55e;
+  --success-muted:  rgba(34, 197, 94, 0.15);
+  --warning:        #f59e0b;
+  --warning-muted:  rgba(245, 158, 11, 0.15);
+  --danger:         #ef4444;
+  --danger-muted:   rgba(239, 68, 68, 0.15);
+  --info:           #3b82f6;
+  --info-muted:     rgba(59, 130, 246, 0.15);
+
+  /* Chart palette */
+  --chart-1:        #6d5dfc;
+  --chart-2:        #22c55e;
+  --chart-3:        #f59e0b;
+  --chart-4:        #3b82f6;
+  --chart-5:        #ec4899;
+
+  /* Sizing */
+  --sidebar-width:  260px;
+  --radius:         0.75rem;
+  --radius-sm:      0.5rem;
+  --radius-lg:      1rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, "Inter", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
+}
+
+/* ── Glass effect utility ──────────────────────────────────────────── */
+.glass {
+  background: rgba(24, 24, 27, 0.6);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* ── Glow animation ────────────────────────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.glow {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ── Skeleton shimmer ──────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-hover) 50%,
+    var(--surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}

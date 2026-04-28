@@ -1,0 +1,28 @@
+{
+  "name": "nexus-tracker-os",
+  "version": "0.1.0",
+  "description": "Multi-tenant B2B attribution & tracking SaaS — ingestion server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "worker": "node --watch src/workers/conversionWorker.js",
+    "worker:start": "node src/workers/conversionWorker.js",
+    "cron": "node --watch src/cron.js",
+    "cron:start": "node src/cron.js",
+    "cron:run-now": "node src/cron.js --run-now"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "bullmq": "^5.34.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.2",
+    "node-cron": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
