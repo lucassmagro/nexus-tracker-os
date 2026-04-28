@@ -29,7 +29,8 @@ Vercel provides native Next.js support and is the recommended hosting platform f
 1. Create a GitHub repository and push your entire codebase.
 2. Go to [Vercel](https://vercel.com/) and click **Add New Project**.
 3. Import your GitHub repository.
-4. **Environment Variables**: Before hitting deploy, open your `.env.example` file and copy the required variables into the Vercel Environment Variables section.
+4. **CRITICAL: Set Root Directory**: In the Vercel project configuration screen, before clicking Deploy, locate the **Root Directory** setting. Change it from `./` to `dashboard`. This tells Vercel where your Next.js application lives.
+5. **Environment Variables**: Open your `.env.example` file and copy the required variables into the Vercel Environment Variables section.
    
    **Required Variables**:
    - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase API URL.
@@ -39,7 +40,7 @@ Vercel provides native Next.js support and is the recommended hosting platform f
    
    *Note: Vercel automatically sets `NEXT_PUBLIC_VERCEL_URL`, so `NEXT_PUBLIC_SITE_URL` is optional unless you are using a custom domain. If you add a custom domain to Vercel, set `NEXT_PUBLIC_SITE_URL` to match it exactly (e.g., `https://tracker.minhaempresa.com`).*
 
-5. Click **Deploy**. Vercel will build the Next.js app and assign you a live URL.
+6. Click **Deploy**. Vercel will build the Next.js app inside the `dashboard` folder and assign you a live URL.
 
 ---
 
