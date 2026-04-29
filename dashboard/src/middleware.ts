@@ -1,10 +1,52 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // Production middleware: security headers only.
-  // Auth is handled at the page/layout level via Supabase SSR.
-  // DO NOT add redirects here — they cause 404 loops on Vercel.
-  const response = NextResponse.next();
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protect routes except auth, public assets, or the root pixel script
+  const isPublicRoute = 
+    request.nextUrl.pathname.startsWith('/login') || 
+    request.nextUrl.pathname.startsWith('/signup') || 
+    request.nextUrl.pathname.startsWith('/auth') ||
+    request.nextUrl.pathname === '/tracker.js' || 
+    request.nextUrl.pathname.startsWith('/api') ||
+    request.nextUrl.pathname.startsWith('/webhooks');
+
+  if (!user && !isPublicRoute) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    return NextResponse.redirect(loginUrl);
+  }
 
   response.headers.set('X-DNS-Prefetch-Control', 'on');
   response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
