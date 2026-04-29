@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+export const proxy = (request: NextRequest) => {
   // Simplified middleware: security headers only to prevent 404 routing loops on Vercel.
   // Next 16 middleware/proxy changes can cause unstable Edge redirects.
   const response = NextResponse.next();
