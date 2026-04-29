@@ -7,10 +7,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const DEMO_WORKSPACE_ID = 'eb8a44df-3d75-4078-90ad-0f26f6afcfbd';
+const DEMO_WORKSPACE_NAME = 'Loja Exemplo BR';
 
 async function linkDemoWorkspace() {
   console.log('🚀 Iniciando vinculação do Workspace de Demo...');
+
+  // 1. Encontrar o ID correto do workspace
+  const { data: workspaces, error: wsSearchError } = await supabase
+    .from('workspaces')
+    .select('id')
+    .eq('name', DEMO_WORKSPACE_NAME)
+    .single();
+
+  if (wsSearchError || !workspaces) {
+    console.error(`❌ Workspace "${DEMO_WORKSPACE_NAME}" não encontrado. Execute o seed.js primeiro.`);
+    process.exit(1);
+  }
+
+  const DEMO_WORKSPACE_ID = workspaces.id;
+  console.log(`✅ Workspace encontrado: ${DEMO_WORKSPACE_ID}`);
 
   // Get the most recently created user or the first one from auth.users
   const { data: authData, error: authError } = await supabase.auth.admin.listUsers();

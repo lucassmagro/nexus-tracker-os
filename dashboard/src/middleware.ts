@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // TEMPORARY BYPASS: Simplified middleware to debug Vercel 404 issue.
-  // We only add security headers, no auth checks or redirects.
+  // Production middleware: security headers only.
+  // Auth is handled at the page/layout level via Supabase SSR.
+  // DO NOT add redirects here — they cause 404 loops on Vercel.
   const response = NextResponse.next();
 
   response.headers.set('X-DNS-Prefetch-Control', 'on');

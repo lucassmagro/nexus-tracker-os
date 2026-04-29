@@ -23,7 +23,10 @@ export default async function IntegrationsPage() {
     .eq("id", workspaceId)
     .single();
 
-  const trackingSnippet = `<script src="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/tracker.js" defer></script>
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:3000');
+
+  const trackingSnippet = `<script src="${baseUrl}/tracker.js" defer></script>
 <script>
   window.nexus = window.nexus || function() { (window.nexus.q = window.nexus.q || []).push(arguments) };
   window.nexus('init', '${workspaceId}');

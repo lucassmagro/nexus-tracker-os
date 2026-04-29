@@ -83,35 +83,35 @@ async function seed() {
       const firstVisitDate = new Date(convertDate);
       firstVisitDate.setHours(firstVisitDate.getHours() - 48);
 
-      await supabase.from('page_views').insert({
+      const { error: pvError1 } = await supabase.from('page_views').insert({
         workspace_id: workspaceId,
         anonymous_fingerprint_id: fingerprint,
-        session_id: sessionId,
         url: 'https://lojaexemplo.com.br/',
         utm_source: firstCampaign.source,
         utm_campaign: firstCampaign.name,
         utm_medium: 'ads',
         created_at: firstVisitDate.toISOString()
       });
+      if (pvError1) console.error('Error inserting page_view 1:', pvError1);
 
       let lastCampaign = firstCampaign;
       if (Math.random() > 0.4) { // 60% chance of a different last click
         lastCampaign = campaigns[Math.floor(Math.random() * campaigns.length)];
       }
 
-      await supabase.from('page_views').insert({
+      const { error: pvError2 } = await supabase.from('page_views').insert({
         workspace_id: workspaceId,
         anonymous_fingerprint_id: fingerprint,
-        session_id: sessionId + '_revisit',
         url: 'https://lojaexemplo.com.br/produto-especial',
         utm_source: lastCampaign.source,
         utm_campaign: lastCampaign.name,
         utm_medium: 'retargeting',
         created_at: convertDate.toISOString()
       });
+      if (pvError2) console.error('Error inserting page_view 2:', pvError2);
 
       const value = Math.floor(Math.random() * (1200 - 150) + 150);
-      await supabase.from('conversions').insert({
+      const { error: convError } = await supabase.from('conversions').insert({
         workspace_id: workspaceId,
         order_id: `NX-${Math.floor(Math.random() * 100000)}`,
         value: value,
@@ -120,16 +120,17 @@ async function seed() {
         status: 'paid',
         created_at: new Date(convertDate.getTime() + 1000 * 60 * 5).toISOString()
       });
+      if (convError) console.error('Error inserting conversion:', convError);
     } else {
-      await supabase.from('page_views').insert({
+      const { error: pvError3 } = await supabase.from('page_views').insert({
         workspace_id: workspaceId,
         anonymous_fingerprint_id: fingerprint,
-        session_id: sessionId,
         url: 'https://lojaexemplo.com.br/',
         utm_source: firstCampaign.source,
         utm_campaign: firstCampaign.name,
         created_at: new Date(now.getTime() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * DAYS)).toISOString()
       });
+      if (pvError3) console.error('Error inserting page_view 3:', pvError3);
     }
   }
 
